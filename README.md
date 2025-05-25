@@ -1,58 +1,94 @@
-# Arsenal FC Stats Analysis - ETL Pipeline 🚀⚽  
+#  Arsenal FC Stats ETL Pipeline (AWS + PySpark)
 
-## Overview  
-This project is an **ETL (Extract, Transform, Load) pipeline** that collects, processes, and analyzes Arsenal FC’s **2024/25 season statistics**. The goal is to **identify trends, strengths, and weaknesses** in Arsenal's performances by extracting data from a **football API**, transforming it using **PySpark**, and loading it into a **cloud database (AWS Redshift)** for deeper analysis.  
+##  Overview
+This project is a fully modular **ETL pipeline** that extracts, transforms, and loads Arsenal FC’s 2023/24 season statistics using **API-Football**, **PySpark**, and **AWS**.
 
-## 🔍 Project Goals  
-- **Extract** Arsenal’s match and player stats from a football API (e.g., API-Football, Understat).  
-- **Transform** the data using **PySpark** (cleaning, calculating key metrics like xG, passing accuracy, defensive errors).  
-- **Load** the processed data into **AWS Redshift** for structured storage.  
-- **Analyze** Arsenal’s performance trends to identify **key areas of improvement and success**.  
-- **Automate** the workflow using **Apache Airflow** for daily data updates.  
+The goal is to identify trends and performance insights by analyzing match data and automating the pipeline using cloud-native tools.
 
-## ⚙️ Tech Stack  
-- **Python** - For scripting and API integration  
-- **PySpark** - For large-scale data transformation  
-- **AWS S3** - For raw and processed data storage  
-- **AWS Redshift** - For structured data analysis  
-- **SQL** - For querying and deriving insights  
-- **Apache Airflow** - For scheduling and automation  
-- **Jupyter Notebooks / Tableau** - For visualization and reporting  
+---
 
-## 📊 Key Metrics to Analyze  
-✅ **Attacking Performance**  
-- Goals per game  
-- Expected Goals (xG) vs. Actual Goals  
-- Shot accuracy & key passes  
+## Project Objectives
+- **Extract** Arsenal match data from API-Football
+- **Transform** using PySpark (goal diff, averages, trend analysis)
+- **Load** into AWS Redshift from Parquet files on S3
+- **Automate** the pipeline with modular Python scripts
 
-✅ **Defensive Strengths & Weaknesses**  
-- Goals conceded & expected goals against (xGA)  
-- Defensive errors leading to goals  
-- Tackles, interceptions, and clearances  
+---
 
-✅ **Team Trends & Tactical Analysis**  
-- Arsenal’s **performance against low-block teams** vs. high-pressing teams  
-- Home vs. Away performance trends  
-- Impact of injuries on team performance  
+## Tech Stack
+- **Python** — scripting and data ingestion
+- **PySpark** — transformation and analytics
+- **AWS S3** — data lake storage (parquet format)
+- **AWS Redshift** — structured data warehouse
+- **boto3** — AWS SDK for Python
+- **dotenv** — secure secrets management
+- *(Optional: Streamlit or Tableau for dashboards)*
 
-## 🏗️ Project Workflow  
-1. **Extract**  
-   - Fetch live & historical Arsenal stats using **API-Football** or **Understat API**  
-   - Store raw data in **AWS S3**  
+---
 
-2. **Transform**  
-   - Clean missing values, normalize data with **PySpark**  
-   - Generate calculated fields (goal difference, xG, pass accuracy)  
+## Folder Structure
 
-3. **Load**  
-   - Save transformed data in **AWS Redshift** for structured queries  
+```
+arsenal-etl-dashboard/
+├── etl/
+│   ├── extract.py       # API data extraction
+│   ├── transform.py     # PySpark transformation
+│   ├── load.py          # Redshift COPY from S3
+├── run_etl.py           # Orchestrates the ETL pipeline
+├── .env                 # Environment variables (not committed)
+├── requirements.txt     # Python dependencies
+├── README.md            # You're here
+```
 
-4. **Analyze & Visualize**  
-   - Use SQL to analyze performance patterns  
-   - Build **Tableau/Power BI dashboards** for insights  
+---
 
-## 🔄 Future Enhancements  
-- **Real-time match tracking** using Kafka  
-- **Player heatmap visualization** (showing movement & positioning)  
-- **Machine learning model** to predict match outcomes  
+## How to Run
 
+1. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Configure AWS credentials**
+   ```bash
+   aws configure
+   ```
+
+3. **Set environment variables** in `.env`:
+   ```
+   API_FOOTBALL_KEY=your_api_key
+   REDSHIFT_DB=your_db
+   REDSHIFT_USER=your_user
+   REDSHIFT_PASSWORD=your_password
+   REDSHIFT_HOST=your_redshift_host
+   REDSHIFT_PORT=5439
+   REDSHIFT_IAM_ROLE=your_redshift_iam_role
+   S3_PARQUET_PATH=s3://your-bucket-name/processed/arsenal_stats.parquet
+   ```
+
+4. **Run the pipeline**
+   ```bash
+   python run_etl.py
+   ```
+
+---
+
+## Metrics Analyzed
+- Average goals (home/away)
+- Goal difference trend
+- Match outcomes vs. opponent
+- (More to come...)
+
+---
+
+## Future Enhancements
+- Streamlit-based dashboard
+- Redshift/Athena query explorer
+- Real-time event tracking
+- ML model for match outcome prediction
+
+---
+
+## Notes
+- Requires AWS Free Tier or credentials with S3 + Redshift access
+- API-Football is rate-limited under the free tier
