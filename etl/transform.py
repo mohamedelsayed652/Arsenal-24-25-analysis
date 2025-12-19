@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # S3 output path
-s3_output_path = os.getenv("S3_PARQUET_PATH", "s3://arsenal-etl-pipeline/processed/arsenal_stats.parquet")
+s3_output_path = os.getenv("S3_PARQUET_PATH", "s3a://arsenal-etl-pipeline/processed/arsenal_stats.parquet")
 
 def run_transformation(csv_path="arsenal_matches.csv"):
     # Initialize Spark with S3 support (using s3a and environment variable credentials)
@@ -18,6 +18,7 @@ def run_transformation(csv_path="arsenal_matches.csv"):
         .config("spark.hadoop.fs.s3a.aws.credentials.provider", "com.amazonaws.auth.EnvironmentVariableCredentialsProvider") \
         .config("spark.hadoop.fs.s3a.access.key", os.getenv("AWS_ACCESS_KEY_ID")) \
         .config("spark.hadoop.fs.s3a.secret.key", os.getenv("AWS_SECRET_ACCESS_KEY")) \
+        .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider") \
         .config("spark.hadoop.fs.s3a.path.style.access", "true") \
         .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
         .getOrCreate()
