@@ -9,3 +9,5 @@ etl/__pycache__/transform.cpython-312.pyc
 etl/__pycache__/extract.cpython-312.pyc
 etl/__pycache__/transform_spark.cpython-312.pyc
 etl/__pycache__/validation.cpython-312.pyc
+sql/external_schema.sql
+sql/usage_queries.sql
