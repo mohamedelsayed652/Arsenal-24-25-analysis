@@ -1,7 +1,7 @@
 #  Arsenal FC Stats ETL Pipeline (AWS + PySpark)
 
 ##  Overview
-This project is a fully modular **ETL pipeline** that extracts, transforms, and loads Arsenal FC’s 2023/24 season statistics using **API-Football**, **PySpark**, and **AWS**.
+This project is a fully modular **ETL pipeline** that extracts, transforms, and loads Arsenal FC’s 2023/24 season statistics using **API-Football**, **pandas/Parquet**, and **AWS**.
 
 The goal is to identify trends and performance insights by analyzing match data and automating the pipeline using cloud-native tools.
 
@@ -9,15 +9,17 @@ The goal is to identify trends and performance insights by analyzing match data 
 
 ## Project Objectives
 - **Extract** Arsenal match data from API-Football
-- **Transform** using PySpark (goal diff, averages, trend analysis)
-- **Load** into AWS Redshift from Parquet files on S3
+- **Transform** using pandas (goal diff, rolling averages, trend analysis)
+- **Load** into AWS Redshift from Parquet files on S3 (optional)
 - **Automate** the pipeline with modular Python scripts
 
 ---
 
 ## Tech Stack
 - **Python** — scripting and data ingestion
-- **PySpark** — transformation and analytics
+- **pandas** — transformation and analytics
+- **pyarrow** — Parquet writing
+- **PySpark** — optional Spark-based transformation
 - **AWS S3** — data lake storage (parquet format)
 - **AWS Redshift** — structured data warehouse
 - **boto3** — AWS SDK for Python
@@ -32,9 +34,10 @@ The goal is to identify trends and performance insights by analyzing match data 
 arsenal-etl-dashboard/
 ├── etl/
 │   ├── extract.py       # API data extraction
-│   ├── transform.py     # PySpark transformation
+│   ├── transform.py     # pandas transformation (writes Parquet locally or to S3)
 │   ├── load.py          # Redshift COPY from S3
-├── run_etl.py           # Orchestrates the ETL pipeline
+├── run_etl.py           # Orchestrates the ETL pipeline (extract -> transform -> load)
+├── transform_data.py    # Run only the transform step on an existing CSV
 ├── .env                 # Environment variables (not committed)
 ├── requirements.txt     # Python dependencies
 ├── README.md            # You're here
@@ -54,7 +57,7 @@ arsenal-etl-dashboard/
    aws configure
    ```
 
-3. **Set environment variables** in `.env`:
+3. **Set environment variables** in `.env` (see `.env.example`):
    ```
    API_FOOTBALL_KEY=your_api_key
    REDSHIFT_DB=your_db
@@ -70,6 +73,32 @@ arsenal-etl-dashboard/
    ```bash
    python run_etl.py
    ```
+   - If `S3_PARQUET_PATH` is not set to an `s3://` path, the pipeline will run extract + transform and skip the Redshift load step.
+   - To run only the transform step on an existing CSV, use:
+     ```bash
+     python transform_data.py --input arsenal_matches.csv --output arsenal_avg_goals.parquet
+     ```
+   - Optional Spark path: set `USE_SPARK=true` to run the PySpark transform instead of pandas (requires `pyspark` and Spark-compatible environment).
+
+## Infrastructure (Terraform)
+- The `infra/` folder provisions an S3 bucket, IAM role for Redshift COPY, and a Redshift Serverless namespace/workgroup.
+- Requirements: Terraform >= 1.3, AWS credentials with permissions for S3, IAM, and Redshift Serverless.
+- Quick start:
+  ```bash
+  cd infra
+  terraform init
+  terraform apply -var="s3_bucket_name=your-unique-bucket-name"
+  ```
+  Outputs include `s3_parquet_path`, `redshift_iam_role_arn`, and the Redshift endpoint to plug into your `.env`.
+ - Optional Lake Formation/Glue registration: set `-var="enable_lakeformation=true"` and adjust `glue_catalog_db` if desired (requires LF permissions).
+ - Spectrum external schema: see `sql/external_schema.sql` to create an external schema/table over the S3 Parquet data.
+
+---
+
+## Testing & Validation
+- Install dev dependencies (already in `requirements.txt`): `pytest`, `pandera`.
+- Run tests: `pytest`
+- Data schema validation runs inside `run_transformation`; failures raise with details on offending columns/values.
 
 ---
 
@@ -77,7 +106,14 @@ arsenal-etl-dashboard/
 - Average goals (home/away)
 - Goal difference trend
 - Match outcomes vs. opponent
-- (More to come...)
+- Rolling 5-match averages for goals and goal diff
+
+---
+
+## Data Model & SQL
+- Data model: `docs/data_model.md`
+- DDL and sample views: `schema.sql`
+- Sample analytical queries: `sql/usage_queries.sql`
 
 ---
 
