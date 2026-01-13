@@ -1,7 +1,7 @@
 #  Arsenal FC Stats ETL Pipeline (AWS + PySpark)
 
 ##  Overview
-This project is a fully modular **ETL pipeline** that extracts, transforms, and loads Arsenal FC’s 2023/24 season statistics using **API-Football**, **pandas/Parquet**, and **AWS**.
+This project is a fully modular **ETL pipeline** that extracts, transforms, and loads Arsenal FC’s 2023/24 season statistics using **API-Football**, **PySpark/Parquet**, and **AWS**.
 
 The goal is to identify trends and performance insights by analyzing match data and automating the pipeline using cloud-native tools.
 
@@ -17,9 +17,9 @@ The goal is to identify trends and performance insights by analyzing match data 
 
 ## Tech Stack
 - **Python** — scripting and data ingestion
-- **pandas** — transformation and analytics
+- **PySpark** — default transformation engine
+- **pandas** — alternative local transformation path
 - **pyarrow** — Parquet writing
-- **PySpark** — optional Spark-based transformation
 - **AWS S3** — data lake storage (parquet format)
 - **AWS Redshift** — structured data warehouse
 - **boto3** — AWS SDK for Python
@@ -36,6 +36,7 @@ arsenal-etl-dashboard/
 │   ├── extract.py       # API data extraction
 │   ├── transform.py     # pandas transformation (writes Parquet locally or to S3)
 │   ├── load.py          # Redshift COPY from S3
+│   ├── transform_spark.py # Spark transformation (default path)
 ├── run_etl.py           # Orchestrates the ETL pipeline (extract -> transform -> load)
 ├── transform_data.py    # Run only the transform step on an existing CSV
 ├── .env                 # Environment variables (not committed)
@@ -73,12 +74,13 @@ arsenal-etl-dashboard/
    ```bash
    python run_etl.py
    ```
+   - Spark transform runs by default. Set `USE_PANDAS=true` if you need the pandas path locally.
    - If `S3_PARQUET_PATH` is not set to an `s3://` path, the pipeline will run extract + transform and skip the Redshift load step.
-   - To run only the transform step on an existing CSV, use:
+   - To run only the transform step on an existing CSV (Spark by default), use:
      ```bash
      python transform_data.py --input arsenal_matches.csv --output arsenal_avg_goals.parquet
      ```
-   - Optional Spark path: set `USE_SPARK=true` to run the PySpark transform instead of pandas (requires `pyspark` and Spark-compatible environment).
+     Add `--engine pandas` to use pandas instead.
 
 ## Infrastructure (Terraform)
 - The `infra/` folder provisions an S3 bucket, IAM role for Redshift COPY, and a Redshift Serverless namespace/workgroup.

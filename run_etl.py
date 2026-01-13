@@ -20,7 +20,7 @@ def main():
     log.info("🚀 Starting Arsenal ETL pipeline...")
 
     output_path = os.getenv("S3_PARQUET_PATH", "arsenal_avg_goals.parquet")
-    use_spark = os.getenv("USE_SPARK", "").lower() in ("1", "true", "yes")
+    use_pandas = os.getenv("USE_PANDAS", "").lower() in ("1", "true", "yes")
 
     # Step 1: Extract
     try:
@@ -33,11 +33,12 @@ def main():
 
     # Step 2: Transform
     try:
-        if use_spark:
-            log.info("Using Spark-based transform (USE_SPARK=%s)", use_spark)
-            run_transformation_spark(csv_path="arsenal_matches.csv", output_path=output_path)
-        else:
+        if use_pandas:
+            log.info("Using pandas transform (USE_PANDAS=%s)", use_pandas)
             run_transformation(csv_path="arsenal_matches.csv", output_path=output_path)
+        else:
+            log.info("Using Spark-based transform (default). Set USE_PANDAS=true to fallback.")
+            run_transformation_spark(csv_path="arsenal_matches.csv", output_path=output_path)
     except Exception as e:
         log.error("❌ Transformation failed: %s", e)
         return

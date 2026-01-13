@@ -2,6 +2,7 @@ import argparse
 import os
 
 from etl.transform import run_transformation
+from etl.transform_spark import run_transformation_spark
 
 
 def parse_args() -> argparse.Namespace:
@@ -18,12 +19,21 @@ def parse_args() -> argparse.Namespace:
         default=os.getenv("S3_PARQUET_PATH", "arsenal_avg_goals.parquet"),
         help="Parquet output path (local path or s3://bucket/key).",
     )
+    parser.add_argument(
+        "--engine",
+        choices=["spark", "pandas"],
+        default="spark",
+        help="Transformation engine to use. Default is spark.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    run_transformation(csv_path=args.input, output_path=args.output)
+    if args.engine == "pandas":
+        run_transformation(csv_path=args.input, output_path=args.output)
+    else:
+        run_transformation_spark(csv_path=args.input, output_path=args.output)
 
 
 if __name__ == "__main__":

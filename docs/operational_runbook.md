@@ -10,6 +10,7 @@
 1) `cp .env.example .env` and fill in values.
 2) `pip install -r requirements.txt`
 3) `python run_etl.py`
+   - Spark transform runs by default; set `USE_PANDAS=true` to use the pandas path locally.
    - If `S3_PARQUET_PATH` is local (no `s3://`), Redshift load is skipped.
 
 ## Terraform (no deploy yet)
